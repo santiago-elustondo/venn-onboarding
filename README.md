@@ -1,6 +1,6 @@
 # Onboarding Form App
 
-A small Next.js + TypeScript app demonstrating a cohesive, testable form architecture with strong separation of concerns.
+A small Next.js + TypeScript app demonstrating hook-driven form architecture
 
 ## Highlights
 
@@ -13,7 +13,7 @@ A small Next.js + TypeScript app demonstrating a cohesive, testable form archite
 
 ## Getting Started
 
-Prereqs: Node 18+ (recommended 20)
+Prereqs: Node 20
 
 - Install: `npm install`
 - Dev: `npm run dev` then open http://localhost:3000
@@ -121,12 +121,3 @@ Render with `FormView` and route on submit success.
 - Hooks expose structured state + small, named actions (`onChange`, `onBlur`, `validateNow`, `reset`).
 - I/O adapters accept an `AbortSignal` and never throw for non-abort errors; instead, they return typed error results.
 - Tests prefer behavior verification via the public surface (no internal state peeking).
-
-## Notes
-
-  (Phone field is provided from `modules/fields/usePhoneField`.)
-- `AbortSignal.any` is used when available for timeouts; ensure runtime support or adapt with a small helper if needed.
-
-## License
-
-MIT
