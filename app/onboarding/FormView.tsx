@@ -88,7 +88,7 @@ export function FormView({ form, onSubmitSuccess }: FormViewProps) {
               onChange={form.corporationNumber.onChange}
               onBlur={form.corporationNumber.onBlur}
               onFocus={form.corporationNumber.onFocus}
-              disabled={form.isSubmitting || form.corporationNumber.isLoading}
+              disabled={form.isSubmitting}
               data-testid="corporation-number-input"
             />
             
