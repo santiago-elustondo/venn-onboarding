@@ -84,6 +84,11 @@ __tests__/                 # Unit/integration/E2E-style tests
 
 - UI: presentational components only; no business logic. Errors render beside labels; inputs only show blue focus styles.
 
+### Architecture Decisions
+
+- See ADRs: docs/adr/README.md
+- Direct link: docs/adr/0001-field-state-machines.md
+
 ### Validation UX
 
 - While typing: no errors.

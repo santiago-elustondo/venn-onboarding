@@ -105,13 +105,7 @@ export function FormView({ form, onSubmitSuccess }: FormViewProps) {
               {form.corporationNumber.state.tag === "error" && `Validation error: ${form.corporationNumber.state.remoteMessage}`}
             </div>
             
-            {/* Visual loading indicator */}
-            {form.corporationNumber.isLoading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                <span>Validating corporation number...</span>
-              </div>
-            )}
+            {/* Note: Only show the spinner beside the label via FormInput */}
           </div>
 
           {/* Form-level error display */}
