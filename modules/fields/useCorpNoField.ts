@@ -6,12 +6,11 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { 
-  isPlausibleCorpNo, 
-  whyNotPlausibleCorpNo, 
+import {
+  whyNotPlausibleCorpNo,
   toPlausibleCorpNo,
-  type PlausibleCorpNo, 
-  type CorpNoLocalIssue 
+  type PlausibleCorpNo,
+  type CorpNoLocalIssue,
 } from "../domain/corpNo";
 import type { CorpNoFetcher, CorpNoValidationResult } from "../io/corpFetcher";
 import type { CorpNoCache } from "../cache/inMemoryCorpNoCache";
@@ -287,7 +286,6 @@ export function useCorpNoField({
   const currentRequestRef = useRef<RequestTracker | null>(null);
   const validationAwaiterRef = useRef<{
     resolve: (isValid: boolean) => void;
-    reject: (error: Error) => void;
   } | null>(null);
   
   // Clear idle timer when state changes
@@ -490,7 +488,7 @@ export function useCorpNoField({
   const validateNow = useCallback((): Promise<boolean> => {
     dispatch({ type: "evaluate", timestamp: Date.now() });
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       // If already in a terminal state, resolve immediately
       if (state.tag === "valid") {
         resolve(true);
@@ -502,7 +500,7 @@ export function useCorpNoField({
       }
       
       // Store awaiter for async resolution
-      validationAwaiterRef.current = { resolve, reject };
+      validationAwaiterRef.current = { resolve };
       
       // Set timeout to avoid hanging
       setTimeout(() => {

@@ -1,6 +1,5 @@
 import * as React from "react"
 import PhoneInput from "react-phone-number-input/input"
-import { isValidPhoneNumber } from "react-phone-number-input"
 import { cn } from "@/lib/utils"
 
 export interface PhoneInputProps {
@@ -14,12 +13,6 @@ export interface PhoneInputProps {
   className?: string
   "aria-invalid"?: boolean
   hasError?: boolean
-}
-
-export function isValidNorthAmericaPhoneNumber(phoneNumber: string | undefined): boolean {
-  if (!phoneNumber) return false
-  // Check if it's valid for either US or Canada (both use +1 country code)
-  return isValidPhoneNumber(phoneNumber, 'US') || isValidPhoneNumber(phoneNumber, 'CA')
 }
 
 const PhoneInputComponent = React.forwardRef<HTMLInputElement, PhoneInputProps>(

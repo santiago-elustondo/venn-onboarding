@@ -11,8 +11,8 @@ import { useNameField } from "../fields/useNameField";
 import { usePhoneField } from "../fields/usePhoneField";
 import { useCorpNoField } from "../fields/useCorpNoField";
 import { createDefaultCorpNoCache } from "../cache/inMemoryCorpNoCache";
-import { toPlausibleCorpNo } from "../domain/corpNo";
 import { getNameValidationError } from "../domain/simple";
+import { formatCorpNoLocalIssue } from "../domain/corpNo";
 import type { CorpNoFetcher } from "../io/corpFetcher";
 import type { ProfileDetailsSubmitter, ProfileDetailsPayload } from "../io/postProfileDetails";
 import type { CorpNoCache } from "../cache/inMemoryCorpNoCache";
@@ -114,26 +114,23 @@ export function useOnboardingForm({
       
       corporationNumber: (() => {
         if (!corporationNumber.isTouched) return null;
-        
+
         if (corporationNumber.localIssue) {
-          // Import here to avoid circular dependencies
-          const { formatCorpNoLocalIssue } = require("../domain/corpNo");
           return formatCorpNoLocalIssue(corporationNumber.localIssue);
         }
-        
+
         if (corporationNumber.state.tag === "invalid" && corporationNumber.state.remoteMessage) {
           return corporationNumber.state.remoteMessage;
         }
-        
+
         if (corporationNumber.state.tag === "error" && corporationNumber.state.remoteMessage) {
           return corporationNumber.state.remoteMessage;
         }
-        
+
         if (corporationNumber.state.tag === "implausible" && corporationNumber.localIssue) {
-          const { formatCorpNoLocalIssue } = require("../domain/corpNo");
           return formatCorpNoLocalIssue(corporationNumber.localIssue);
         }
-        
+
         return null;
       })(),
     };
