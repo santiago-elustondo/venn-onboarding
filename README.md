@@ -1,173 +1,126 @@
 # Onboarding Form App
 
-A simple three-page onboarding form application built with Next.js, TypeScript, and React.
+A small Next.js + TypeScript app demonstrating a cohesive, testable form architecture with strong separation of concerns.
 
-## Features
+## Highlights
 
-- **Three-page flow**: Greeting → Onboarding Form → Welcome
-- **Strict TypeScript**: Full type safety across the codebase
-- **Zod validation**: Schema-based validation for all form fields
-- **Custom React hooks**: Clean separation of concerns with `useOnboardingForm`
-- **On-blur validation**: Real-time field validation as users complete each field
-- **Async validation**: Corporation number validation via external API
-- **Comprehensive tests**: React Testing Library tests for all components and logic
-- **CI/CD**: GitHub Actions for automated testing and deployment to Vercel
-
-## Form Fields
-
-1. **First Name** (required, max 50 characters)
-2. **Last Name** (required, max 50 characters)
-3. **Phone Number** (required, Canadian format: starts with 1, 11 digits total)
-4. **Corporation Number** (required, 9 characters, validated via API)
+- Blur/idle-driven validation UX (no errors while typing)
+- Deterministic field state machines (local + remote validation)
+- Dependency-injected I/O adapters with error handling and cancellation
+- In-memory TTL cache for remote corp number validation
+- Accessible UI with consistent focus styles and ARIA semantics
+- Comprehensive tests (RTL + Jest)
 
 ## Getting Started
 
-### Prerequisites
+Prereqs: Node 18+ (recommended 20)
 
-- Node.js 20.x or higher
-- npm or yarn
-
-### Installation
-
-\`\`\`bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-\`\`\`
-
-Open [http://localhost:3000](http://localhost:3000) to view the app.
-
-### Running Tests
-
-\`\`\`bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm test -- --coverage
-\`\`\`
-
-### Building for Production
-
-\`\`\`bash
-# Create production build
-npm run build
-
-# Start production server
-npm start
-\`\`\`
+- Install: `npm install`
+- Dev: `npm run dev` then open http://localhost:3000
+- Test: `npm test`
+- Build: `npm run build` then `npm start`
 
 ## Project Structure
 
-\`\`\`
-├── app/
-│   ├── page.tsx                 # Greeting page
-│   ├── onboarding/
-│   │   └── page.tsx            # Onboarding form page
-│   ├── welcome/
-│   │   └── page.tsx            # Success page
-│   ├── layout.tsx              # Root layout
-│   └── globals.css             # Global styles
-├── components/
-│   ├── form-input.tsx          # Reusable form input component
-│   └── ui/                     # shadcn/ui components
-├── hooks/
-│   └── use-onboarding-form.ts  # Custom form hook
-├── lib/
-│   ├── types.ts                # TypeScript types
-│   ├── validation.ts           # Zod schemas and validators
-│   ├── api.ts                  # API service layer
-│   └── utils.ts                # Utility functions
-├── __tests__/                  # Test files
-└── .github/
-    └── workflows/              # GitHub Actions workflows
-\`\`\`
+```
+app/
+  page.tsx                 # Landing
+  onboarding/
+    page.tsx               # Form route
+    FormView.tsx           # Presentational form view
+    PhoneFieldView.tsx     # Presentational phone field view
+  welcome/page.tsx         # Success route
+
+components/
+  form-input.tsx           # Reusable input + label + error
+  ui/                      # Small, focused UI primitives
+
+lib/
+  utils.ts                 # cn() utility
+
+modules/
+  domain/
+    simple.ts              # Local validators + messages (name/phone)
+    corpNo.ts              # Corp number types + local plausibility
+  fields/
+    useSimpleField.ts      # Local validation state machine
+    useNameField.ts        # Name field (uses useSimpleField)
+    usePhoneField.ts       # Phone field (uses useSimpleField)
+    useCorpNoField.ts      # Corp number field (local + remote)
+  io/
+    corpFetcher.ts         # Remote corp number validation adapter
+    postProfileDetails.ts  # Form submission adapter
+  cache/
+    inMemoryCorpNoCache.ts # TTL cache for corp validation results
+  forms/
+    useOnboardingForm.ts   # Composes fields + submit flow
+
+hooks/
+  usePhoneField.ts         # Re-export for compatibility
+
+__tests__/                 # Unit/integration/E2E-style tests
+```
 
 ## Architecture
 
-### Separation of Concerns
+- Domain (pure): `modules/domain/*`
+  - `simple.ts` provides `isValidName`, `isValidPhoneCA`, and error helpers.
+  - `corpNo.ts` provides `PlausibleCorpNo`, plausibility checks, and messages.
 
-- **Models & Types** (`lib/types.ts`): Core domain types
-- **Validation** (`lib/validation.ts`): Zod schemas and field validators
-- **API Layer** (`lib/api.ts`): External API calls
-- **Business Logic** (`hooks/use-onboarding-form.ts`): Form state and validation logic
-- **UI Components** (`components/`): Pure presentational components
-- **Pages** (`app/`): Route-level components
+- Field state machines: `modules/fields/*`
+  - `useSimpleField` manages local-only fields (empty → active → valid/invalid) with blur/idle triggers.
+  - `useNameField` and `usePhoneField` wrap `useSimpleField` with domain validators and phone-specific conveniences (E.164).
+  - `useCorpNoField` adds remote I/O + cache + cancellation on top of local plausibility.
 
-### Custom Hook Pattern
+- I/O adapters: `modules/io/*`
+  - `corpFetcher` validates a corp number remotely with timeouts, abort handling, and typed results.
+  - `postProfileDetails` submits the form payload robustly.
 
-The `useOnboardingForm` hook encapsulates all form logic:
-- Form state management
-- Field-level validation (on blur)
-- Async corporation number validation
-- Form submission
-- Error handling
+- Cache: `modules/cache/inMemoryCorpNoCache.ts` — TTL-based in-memory cache of corp results.
 
-This keeps components clean and focused on presentation.
+- Form composition: `modules/forms/useOnboardingForm.ts`
+  - Composes field hooks, exposes `canSubmit`, `validateAll()`, `submit()`, and error getters.
+  - Injects `corpFetcher`/`postProfileDetails` and uses a default cache unless one is provided.
 
-## API Endpoints
+- UI: presentational components only; no business logic. Errors render beside labels; inputs only show blue focus styles.
 
-### Corporation Number Validation
-\`\`\`
-GET https://fe-hometask-api.qa.vault.tryvault.com/corporation-number/:number
-\`\`\`
+### Validation UX
 
-### Profile Submission
-\`\`\`
-POST https://fe-hometask-api.qa.vault.tryvault.com/profile-details
-\`\`\`
+- While typing: no errors.
+- After blur or idle timeout: errors appear for invalid inputs.
+- Focus clears errors to reduce user friction.
+- Corp number: local plausibility first; then remote validation with spinner/checkmark feedback.
 
-## Deployment
+## Usage Examples
 
-### Vercel (Recommended)
+Create the form in a page:
 
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Set up required secrets in GitHub:
-   - `VERCEL_TOKEN`
-   - `VERCEL_ORG_ID`
-   - `VERCEL_PROJECT_ID`
-4. Push to `main` branch to trigger automatic deployment
+```ts
+// app/onboarding/page.tsx
+import { useOnboardingForm } from "@/modules/forms/useOnboardingForm";
+import { corpFetcher } from "@/modules/io/corpFetcher";
+import { postProfileDetails } from "@/modules/io/postProfileDetails";
 
-### Manual Deployment
+const form = useOnboardingForm({
+  corpFetcher,
+  postProfileDetails,
+  idleMs: 500,
+  cacheTtlMs: 5 * 60 * 1000,
+});
+```
 
-\`\`\`bash
-# Install Vercel CLI
-npm i -g vercel
+Render with `FormView` and route on submit success.
 
-# Deploy
-vercel --prod
-\`\`\`
+## Conventions
 
-## GitHub Actions
+- Hooks expose structured state + small, named actions (`onChange`, `onBlur`, `validateNow`, `reset`).
+- I/O adapters accept an `AbortSignal` and never throw for non-abort errors; instead, they return typed error results.
+- Tests prefer behavior verification via the public surface (no internal state peeking).
 
-Two workflows are configured:
+## Notes
 
-1. **CI** (`.github/workflows/ci.yml`): Runs on all pushes and PRs
-   - Linting
-   - Tests with coverage
-   - Build verification
-
-2. **Deploy** (`.github/workflows/deploy.yml`): Runs on pushes to `main`
-   - Runs tests
-   - Deploys to Vercel production
-
-## Technologies
-
-- **Next.js 16**: React framework with App Router
-- **React 19**: UI library
-- **TypeScript**: Type safety
-- **Zod**: Schema validation
-- **Tailwind CSS**: Styling
-- **shadcn/ui**: UI components
-- **React Testing Library**: Testing
-- **Jest**: Test runner
-- **GitHub Actions**: CI/CD
+- `hooks/usePhoneField.ts` re-exports `modules/fields/usePhoneField` for compatibility.
+- `AbortSignal.any` is used when available for timeouts; ensure runtime support or adapt with a small helper if needed.
 
 ## License
 

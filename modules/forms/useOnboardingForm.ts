@@ -8,7 +8,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useNameField } from "../fields/useNameField";
-import { usePhoneField } from "../../hooks/usePhoneField";
+import { usePhoneField } from "../fields/usePhoneField";
 import { useCorpNoField } from "../fields/useCorpNoField";
 import { createDefaultCorpNoCache } from "../cache/inMemoryCorpNoCache";
 import { toPlausibleCorpNo } from "../domain/corpNo";

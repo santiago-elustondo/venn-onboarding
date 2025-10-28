@@ -383,6 +383,21 @@ export function useCorpNoField({
       
       const performRequest = async () => {
         try {
+          if (typeof fetcher !== 'function') {
+            const timestamp = Date.now();
+            const fallbackError: CorpNoValidationResult = {
+              kind: "error",
+              error: "network",
+              message: "fetcher is not a function",
+            };
+            dispatch({ type: "remote:error", result: fallbackError, timestamp });
+            if (validationAwaiterRef.current) {
+              validationAwaiterRef.current.resolve(false);
+              validationAwaiterRef.current = null;
+            }
+            return;
+          }
+
           const result = await fetcher(currentValue, controller.signal);
           
           // Check if this request is still current

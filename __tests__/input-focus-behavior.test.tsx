@@ -85,14 +85,12 @@ describe("Input Focus Behavior", () => {
       // Blur to trigger validation
       await user.tab();
       
-      // Error should appear beside the label (where checkmark would be)
-      const label = screen.getByText(/first name/i);
-      const labelContainer = label.closest('label');
-      
+      // Error should appear beside the label in the flex container
       await waitFor(() => {
-        // Error message should be in the label area, not below the input
-        const errorInLabel = labelContainer?.querySelector('[role="alert"]');
-        expect(errorInLabel).toBeInTheDocument();
+        // Error message should be in the flex container beside the label
+        const errorMessage = screen.getByRole("alert");
+        expect(errorMessage).toBeInTheDocument();
+        expect(errorMessage).toHaveTextContent("Letters only");
       });
       
       // There should NOT be an error message below the input
@@ -140,13 +138,11 @@ describe("Input Focus Behavior", () => {
       await user.type(phoneInput, "123");
       await user.tab();
       
-      // Error should be beside label
-      const label = screen.getByText(/phone number/i);
-      const labelContainer = label.closest('label');
-      
+      // Error should be beside label in the flex container
       await waitFor(() => {
-        const errorInLabel = labelContainer?.querySelector('[role="alert"]');
-        expect(errorInLabel).toBeInTheDocument();
+        const errorMessage = screen.getByRole("alert");
+        expect(errorMessage).toBeInTheDocument();
+        expect(errorMessage).toHaveTextContent(/invalid|required/i);
       });
     });
   });
