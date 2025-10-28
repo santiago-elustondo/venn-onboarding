@@ -1,4 +1,21 @@
-import type { CorporationValidationResponse, OnboardingFormData, SubmitResponse } from "./types"
+// API Response Types
+export interface CorporationValidationResponse {
+  valid: boolean
+  message?: string
+  corporationNumber?: string
+}
+
+export interface OnboardingFormData {
+  firstName: string
+  lastName: string
+  phone: string
+  corporationNumber: string
+}
+
+export interface SubmitResponse {
+  success: boolean
+  message?: string
+}
 
 const API_BASE_URL = "https://fe-hometask-api.qa.vault.tryvault.com"
 
