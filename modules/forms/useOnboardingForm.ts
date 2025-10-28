@@ -102,15 +102,15 @@ export function useOnboardingForm({
   // Get current field error messages
   const getFieldErrors = useCallback(() => {
     const errors = {
-      firstName: firstName.isTouched && !firstName.isValid 
+      firstName: firstName.isInvalid 
         ? getNameValidationError(firstName.value)
         : null,
       
-      lastName: lastName.isTouched && !lastName.isValid 
+      lastName: lastName.isInvalid 
         ? getNameValidationError(lastName.value) 
         : null,
       
-      phone: phone.isTouched && !phone.isValid 
+      phone: phone.isInvalid 
         ? getPhoneValidationError(phone.value) 
         : null,
       
@@ -142,9 +142,9 @@ export function useOnboardingForm({
     
     return errors;
   }, [
-    firstName.isTouched, firstName.isValid, firstName.value,
-    lastName.isTouched, lastName.isValid, lastName.value,
-    phone.isTouched, phone.isValid, phone.value,
+    firstName.isInvalid, firstName.value,
+    lastName.isInvalid, lastName.value,
+    phone.isInvalid, phone.value,
     corporationNumber.isTouched, corporationNumber.state, corporationNumber.localIssue,
   ]);
   

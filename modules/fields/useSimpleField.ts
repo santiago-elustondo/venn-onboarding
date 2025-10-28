@@ -82,11 +82,6 @@ function simpleFieldReducer(
     case "evaluate": {
       const { timestamp } = event;
       
-      // Can only evaluate from active state or when we have a value
-      if (state.tag === "empty") {
-        return state;
-      }
-      
       const isValid = validator(state.value);
       
       return {
@@ -119,6 +114,7 @@ export interface SimpleFieldHook {
   evaluate: () => void;
   isTouched: boolean;
   isValid: boolean;
+  isInvalid: boolean;  // Add explicit invalid state
   localIssue: "invalid" | null;
 }
 
@@ -187,6 +183,7 @@ export function useSimpleField({
   
   const isTouched = state.lastBlurAt !== null || state.value.length > 0;
   const isValid = state.tag === "valid";
+  const isInvalid = state.tag === "invalid";  // New: explicit invalid state
   const localIssue = state.issue;
   
   return {
@@ -197,6 +194,7 @@ export function useSimpleField({
     evaluate,
     isTouched,
     isValid,
+    isInvalid,  // Add the explicit invalid state
     localIssue,
   };
 }
