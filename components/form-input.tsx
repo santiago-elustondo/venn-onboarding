@@ -82,7 +82,6 @@ export function FormInput({
         placeholder={placeholder}
         disabled={disabled}
         data-testid={dataTestId}
-        hasError={!!showError}
         aria-invalid={showError ? "true" : "false"}
         aria-describedby={showError ? `${id}-error` : undefined}
       />

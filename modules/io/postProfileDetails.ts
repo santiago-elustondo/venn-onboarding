@@ -5,6 +5,8 @@
  */
 
 import type { PlausibleCorpNo } from "../domain/corpNo";
+import { API_BASE_URL } from "./config";
+import { withTimeoutSignal } from "./abort";
 
 export interface ProfileDetailsPayload {
   firstName: string;
@@ -27,40 +29,23 @@ export type ProfileDetailsSubmitter = (
  * Uses the existing API endpoint with enhanced error handling
  */
 export const postProfileDetails: ProfileDetailsSubmitter = async (payload, signal) => {
-  const API_BASE_URL = "https://fe-hometask-api.qa.vault.tryvault.com";
-  
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-    
-    // Combine external signal with timeout signal
-    const combinedSignal = AbortSignal.any ? 
-      AbortSignal.any([signal, controller.signal]) : 
-      signal;
-    
-    const response = await fetch(
-      `${API_BASE_URL}/profile-details`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: payload.firstName.trim(),
-          lastName: payload.lastName.trim(),
-          phone: payload.phone,
-          corporationNumber: payload.corporationNumber,
-        }),
-        signal: combinedSignal,
-      }
-    );
-    
-    clearTimeout(timeoutId);
-    
-    if (combinedSignal.aborted) {
-      throw new Error("Request was cancelled");
-    }
+    const { signal: combinedSignal, cleanup } = withTimeoutSignal(signal, 15000);
+    const response = await fetch(`${API_BASE_URL}/profile-details`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: payload.firstName.trim(),
+        lastName: payload.lastName.trim(),
+        phone: payload.phone,
+        corporationNumber: payload.corporationNumber,
+      }),
+      signal: combinedSignal,
+    });
+    cleanup();
     
     if (response.ok) {
       return { ok: true };

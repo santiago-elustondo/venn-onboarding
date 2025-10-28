@@ -6,6 +6,8 @@
  */
 
 import type { PlausibleCorpNo } from "../domain/corpNo";
+import { API_BASE_URL } from "./config";
+import { withTimeoutSignal } from "./abort";
 
 export type CorpNoValidationResult =
   | { kind: "valid"; corporationNumber: PlausibleCorpNo }
@@ -22,32 +24,14 @@ export type CorpNoFetcher = (
  * Uses the existing API endpoint with enhanced error handling
  */
 export const corpFetcher: CorpNoFetcher = async (corporationNumber, signal) => {
-  const API_BASE_URL = "https://fe-hometask-api.qa.vault.tryvault.com";
-  
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-    
-    // Combine external signal with timeout signal
-    const combinedSignal = AbortSignal.any ? 
-      AbortSignal.any([signal, controller.signal]) : 
-      signal;
-    
-    const response = await fetch(
-      `${API_BASE_URL}/corporation-number/${corporationNumber}`,
-      { 
+    const { signal: combinedSignal, cleanup } = withTimeoutSignal(signal, 10000);
+    const response = await fetch(`${API_BASE_URL}/corporation-number/${corporationNumber}`,
+      {
         signal: combinedSignal,
-        headers: {
-          'Accept': 'application/json',
-        }
-      }
-    );
-    
-    clearTimeout(timeoutId);
-    
-    if (combinedSignal.aborted) {
-      throw new Error("Request was cancelled");
-    }
+        headers: { Accept: 'application/json' },
+      });
+    cleanup();
     
     if (!response.ok) {
       if (response.status >= 500) {

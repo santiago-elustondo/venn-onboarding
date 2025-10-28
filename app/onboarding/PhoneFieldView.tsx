@@ -38,7 +38,6 @@ export function PhoneFieldView({ phone, className }: PhoneFieldViewProps) {
         onBlur={phone.onBlur}
         onFocus={phone.onFocus}
         placeholder="+1 (555) 000-0000"
-        hasError={showError}
         aria-invalid={showError}
       />
     </div>

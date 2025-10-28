@@ -12,11 +12,10 @@ export interface PhoneInputProps {
   disabled?: boolean
   className?: string
   "aria-invalid"?: boolean
-  hasError?: boolean
 }
 
 const PhoneInputComponent = React.forwardRef<HTMLInputElement, PhoneInputProps>(
-  ({ className, onChange, onBlur, onFocus, hasError, ...props }, ref) => {
+  ({ className, onChange, onBlur, onFocus, ...props }, ref) => {
     const handleChange = React.useCallback((value?: string) => {
       onChange?.(value)
     }, [onChange])

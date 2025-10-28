@@ -522,8 +522,6 @@ export function useCorpNoField({
       validationAwaiterRef.current.resolve(false);
       validationAwaiterRef.current = null;
     }
-    
-    const initialState = createInitialState();
     // We can't directly set state, but we can dispatch a change to empty
     dispatch({ type: "change", value: "", timestamp: Date.now() });
   }, []);
