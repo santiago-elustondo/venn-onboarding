@@ -1,24 +1,14 @@
-# Onboarding Form App
+# Onboarding Form Architecture
 
-A small Next.js + TypeScript app demonstrating a cohesive, testable form architecture with strong separation of concerns.
+A testable form architecture in Next.js + TypeScript
 
-## Highlights
+## Principles
 
-- Blur/idle-driven validation UX (no errors while typing)
-- Deterministic field state machines (local + remote validation)
-- Dependency-injected I/O adapters with error handling and cancellation
-- In-memory TTL cache for remote corp number validation
-- Accessible UI with consistent focus styles and ARIA semantics
-- Comprehensive tests (RTL + Jest)
-
-## Getting Started
-
-Prereqs: Node 18+ (recommended 20)
-
-- Install: `npm install`
-- Dev: `npm run dev` then open http://localhost:3000
-- Test: `npm test`
-- Build: `npm run build` then `npm start`
+- Purity at the core: domain modules are side‑effect free and easy to test.
+- Single responsibility: domain vs. field machines vs. form orchestration vs. I/O vs. UI.
+- Deterministic reducer state machines for fields; no errors while typing (blur/idle validation).
+- Dependency‑injected I/O with abort + timeout handling; typed results instead of throwing.
+- Accessibility: stable focus, ARIA live regions, unobtrusive feedback (spinner/checkmark beside labels).
 
 ## Project Structure
 
@@ -32,101 +22,75 @@ app/
   welcome/page.tsx         # Success route
 
 components/
-  form-input.tsx           # Reusable input + label + error
-  ui/                      # Small, focused UI primitives
+  form-input.tsx           # Reusable input + label + right‑aligned status
+  ui/                      # Focused UI primitives (button, input, label, etc.)
 
 lib/
-  utils.ts                 # cn() utility
+  tailwind.ts              # cn() utility (clsx + tailwind-merge)
 
 modules/
-  domain/
-    simple.ts              # Local validators + messages (name/phone)
-    corpNo.ts              # Corp number types + local plausibility
-  fields/
-    useSimpleField.ts      # Local validation state machine
-    useNameField.ts        # Name field (uses useSimpleField)
-    usePhoneField.ts       # Phone field (uses useSimpleField)
-    useCorpNoField.ts      # Corp number field (local + remote)
-  io/
-    corpFetcher.ts         # Remote corp number validation adapter
-    postProfileDetails.ts  # Form submission adapter
+  domain/                  # Pure validation & types (no React)
+    simple.ts              # Name/phone validators + messages
+    corpNo.ts              # Plausibility + messages + branded type
+  fields/                  # Field state machines (React hooks)
+    useSimpleField.ts      # Local field machine (empty → active → valid/invalid)
+    useNameField.ts        # Name field wrapper
+    usePhoneField.ts       # Phone field wrapper (E.164 + error gating)
+    useCorpNoField.ts      # Corp number (local + remote + cache)
+  io/                      # I/O adapters with abort + timeout
+    abort.ts               # composeAbortSignal, withTimeoutSignal
+    config.ts              # API_BASE_URL
+    corpFetcher.ts         # Remote corp number validation
+    postProfileDetails.ts  # Form submission
   cache/
     inMemoryCorpNoCache.ts # TTL cache for corp validation results
   forms/
     useOnboardingForm.ts   # Composes fields + submit flow
 
-hooks/
-  usePhoneField.ts         # Re-export for compatibility
-
-__tests__/                 # Unit/integration/E2E-style tests
+__tests__/                 # Unit/integration/UX behavior tests
 ```
 
-## Architecture
+## Field State Machines
 
-- Domain (pure): `modules/domain/*`
-  - `simple.ts` provides `isValidName`, `isValidPhoneCA`, and error helpers.
-  - `corpNo.ts` provides `PlausibleCorpNo`, plausibility checks, and messages.
+### SimpleField (name, phone)
+- Tags: `empty | active | invalid | valid`.
+- Events: `change`, `blur`, `focus`, `evaluate`.
+- Idle timer (default ~500ms) when `active` triggers `evaluate`.
+- Derived: `isTouched`, `isValid`, `isInvalid`.
+- UX: No error while typing; show after blur or idle. Focus clears visible error and returns to editing.
 
-- Field state machines: `modules/fields/*`
-  - `useSimpleField` manages local-only fields (empty → active → valid/invalid) with blur/idle triggers.
-  - `useNameField` and `usePhoneField` wrap `useSimpleField` with domain validators and phone-specific conveniences (E.164).
-  - `useCorpNoField` adds remote I/O + cache + cancellation on top of local plausibility.
+`useNameField` and `usePhoneField` are thin wrappers around `useSimpleField`. Phone adds:
+- `e164` formatting via `react-phone-number-input` when valid.
+- Error gating: `Required` or `Invalid`, shown only after blur.
 
-- I/O adapters: `modules/io/*`
-  - `corpFetcher` validates a corp number remotely with timeouts, abort handling, and typed results.
-  - `postProfileDetails` submits the form payload robustly.
+### CorpNoField (local + remote)
+- Tags: `empty | active | implausible | checking | valid | invalid | error`.
+- Local plausibility (`whyNotPlausibleCorpNo`) → if ok, go `checking` with `currentValue` (branded type).
+- Remote I/O:
+  - Aborts stale requests on change.
+  - Uses TTL cache for `valid`/`invalid` results.
+  - Returns typed results; input remains enabled during `checking`.
+  - `validateNow()` resolves when remote completes or immediately for terminal states.
+  - `reset()` aborts, clears awaiters, and empties value.
 
-- Cache: `modules/cache/inMemoryCorpNoCache.ts` — TTL-based in-memory cache of corp results.
+## I/O Adapters
+- Accept an `AbortSignal` and merge with a timeout (`withTimeoutSignal`).
+- `corpFetcher`: GET corp validity; supports legacy shapes; maps HTTP to `valid/invalid/error`.
+- `postProfileDetails`: POST submission; typed `ok/false` with friendly messages.
+- Only throw on `AbortError`; otherwise return typed error results.
 
-- Form composition: `modules/forms/useOnboardingForm.ts`
-  - Composes field hooks, exposes `canSubmit`, `validateAll()`, `submit()`, and error getters.
-  - Injects `corpFetcher`/`postProfileDetails` and uses a default cache unless one is provided.
+## UX Patterns
+- No errors while typing; blur/idle displays validation.
+- Spinner and checkmark align to the right of labels (not in inputs).
+- Live region announces status succinctly; focus stays stable during `checking`.
 
-- UI: presentational components only; no business logic. Errors render beside labels; inputs only show blue focus styles.
+## Tests (What We Cover)
+- Domain validators and messages.
+- Field hook transitions (idle/blur timing, cancellation, reset).
+- App UX: focus stability under validation, spinner/checkmark positions, error messaging.
+  - Remote corp validation uses a deferred fetcher mock to simulate in‑flight and completion.
 
-### Architecture Decisions
-
-- See ADRs: docs/adr/README.md
-- Direct link: docs/adr/0001-field-state-machines.md
-
-### Validation UX
-
-- While typing: no errors.
-- After blur or idle timeout: errors appear for invalid inputs.
-- Focus clears errors to reduce user friction.
-- Corp number: local plausibility first; then remote validation with spinner/checkmark feedback.
-
-## Usage Examples
-
-Create the form in a page:
-
-```ts
-// app/onboarding/page.tsx
-import { useOnboardingForm } from "@/modules/forms/useOnboardingForm";
-import { corpFetcher } from "@/modules/io/corpFetcher";
-import { postProfileDetails } from "@/modules/io/postProfileDetails";
-
-const form = useOnboardingForm({
-  corpFetcher,
-  postProfileDetails,
-  idleMs: 500,
-  cacheTtlMs: 5 * 60 * 1000,
-});
-```
-
-Render with `FormView` and route on submit success.
-
-## Conventions
-
-- Hooks expose structured state + small, named actions (`onChange`, `onBlur`, `validateNow`, `reset`).
-- I/O adapters accept an `AbortSignal` and never throw for non-abort errors; instead, they return typed error results.
-- Tests prefer behavior verification via the public surface (no internal state peeking).
-
-## Notes
-
-  (Phone field is provided from `modules/fields/usePhoneField`.)
-- `AbortSignal.any` is used when available for timeouts; ensure runtime support or adapt with a small helper if needed.
-
-## License
-
-MIT
+## Quickstart
+- Install: `npm install`
+- Dev: `npm run dev` → http://localhost:3000
+- Test: `npm test`
