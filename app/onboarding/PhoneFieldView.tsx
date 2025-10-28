@@ -2,7 +2,7 @@ import React from "react";
 import { Check } from "lucide-react";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
-import { type UsePhoneFieldReturn } from "@/hooks/usePhoneField";
+import { type UsePhoneFieldReturn } from "@/modules/fields/usePhoneField";
 
 interface PhoneFieldViewProps {
   phone: UsePhoneFieldReturn;

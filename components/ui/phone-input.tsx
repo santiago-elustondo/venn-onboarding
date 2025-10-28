@@ -1,6 +1,6 @@
 import * as React from "react"
 import PhoneInput from "react-phone-number-input/input"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/tailwind"
 
 export interface PhoneInputProps {
   id?: string

@@ -124,7 +124,7 @@ Render with `FormView` and route on submit success.
 
 ## Notes
 
-- `hooks/usePhoneField.ts` re-exports `modules/fields/usePhoneField` for compatibility.
+  (Phone field is provided from `modules/fields/usePhoneField`.)
 - `AbortSignal.any` is used when available for timeouts; ensure runtime support or adapt with a small helper if needed.
 
 ## License

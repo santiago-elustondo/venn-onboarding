@@ -1,5 +1,5 @@
 import { renderHook, act } from "@testing-library/react";
-import { usePhoneField } from "../../hooks/usePhoneField";
+import { usePhoneField } from "@/modules/fields/usePhoneField";
 
 describe("usePhoneField - North America (US/CA)", () => {
   it("initializes with empty values", () => {

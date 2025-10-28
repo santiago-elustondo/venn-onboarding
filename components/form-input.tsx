@@ -8,7 +8,7 @@ import React from "react"
 import { Check, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/tailwind"
 
 interface FormInputProps {
   id: string
