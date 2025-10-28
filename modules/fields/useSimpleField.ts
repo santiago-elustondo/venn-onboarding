@@ -24,6 +24,7 @@ export interface SimpleFieldState {
 export type SimpleFieldEvent =
   | { type: "change"; value: string; timestamp: number }
   | { type: "blur"; timestamp: number }
+  | { type: "focus"; timestamp: number }
   | { type: "evaluate"; timestamp: number };
 
 // ============================================================================
@@ -79,6 +80,18 @@ function simpleFieldReducer(
       };
     }
     
+    case "focus": {
+      // Clear error state on focus if we have one
+      if (state.tag === "invalid") {
+        return {
+          ...state,
+          tag: state.value ? "active" : "empty",
+          issue: null,
+        };
+      }
+      return state;
+    }
+    
     case "evaluate": {
       const { timestamp } = event;
       
@@ -111,6 +124,7 @@ export interface SimpleFieldHook {
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
+  onFocus: () => void;
   evaluate: () => void;
   isTouched: boolean;
   isValid: boolean;
@@ -177,6 +191,10 @@ export function useSimpleField({
     dispatch({ type: "blur", timestamp: Date.now() });
   }, []);
   
+  const onFocus = useCallback(() => {
+    dispatch({ type: "focus", timestamp: Date.now() });
+  }, []);
+  
   const evaluate = useCallback(() => {
     dispatch({ type: "evaluate", timestamp: Date.now() });
   }, []);
@@ -191,6 +209,7 @@ export function useSimpleField({
     value: state.value,
     onChange,
     onBlur,
+    onFocus,
     evaluate,
     isTouched,
     isValid,

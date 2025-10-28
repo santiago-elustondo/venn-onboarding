@@ -67,19 +67,19 @@ describe("Corporation Number Domain", () => {
     });
 
     it("should throw for invalid strings", () => {
-      expect(() => toPlausibleCorpNo("")).toThrow("Corporation number is required");
-      expect(() => toPlausibleCorpNo("12345")).toThrow("Corporation number must be exactly 9 digits");
-      expect(() => toPlausibleCorpNo("12345678a")).toThrow("Corporation number must contain only digits");
-      expect(() => toPlausibleCorpNo("1234567890")).toThrow("Corporation number must be exactly 9 digits");
+      expect(() => toPlausibleCorpNo("")).toThrow("Required");
+      expect(() => toPlausibleCorpNo("12345")).toThrow("Invalid");
+      expect(() => toPlausibleCorpNo("12345678a")).toThrow("Only digits");
+      expect(() => toPlausibleCorpNo("1234567890")).toThrow("Invalid");
     });
   });
 
   describe("formatCorpNoLocalIssue", () => {
     it("should format all issue types correctly", () => {
-      expect(formatCorpNoLocalIssue("empty")).toBe("Corporation number is required");
-      expect(formatCorpNoLocalIssue("contains_non_digit")).toBe("Corporation number must contain only digits");
-      expect(formatCorpNoLocalIssue("too_short")).toBe("Corporation number must be exactly 9 digits");
-      expect(formatCorpNoLocalIssue("too_long")).toBe("Corporation number must be exactly 9 digits");
+      expect(formatCorpNoLocalIssue("empty")).toBe("Required");
+      expect(formatCorpNoLocalIssue("contains_non_digit")).toBe("Only digits");
+      expect(formatCorpNoLocalIssue("too_short")).toBe("Invalid");
+      expect(formatCorpNoLocalIssue("too_long")).toBe("Invalid");
     });
 
     it("should handle all possible CorpNoLocalIssue values", () => {

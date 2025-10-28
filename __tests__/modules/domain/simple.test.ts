@@ -69,26 +69,26 @@ describe("Simple Field Validation", () => {
 
   describe("getNameValidationError", () => {
     it("should return appropriate error messages", () => {
-      expect(getNameValidationError("")).toBe("Name is required");
-      expect(getNameValidationError("   ")).toBe("Name is required");
+      expect(getNameValidationError("")).toBe("Required");
+      expect(getNameValidationError("   ")).toBe("Required");
       
       const longName = "a".repeat(51);
-      expect(getNameValidationError(longName)).toBe("Name must be 50 characters or less");
+      expect(getNameValidationError(longName)).toBe("Too long");
       
       // Valid names should still return the generic error message (this function is called only when invalid)
-      expect(getNameValidationError("ValidName")).toBe("Invalid name");
+      expect(getNameValidationError("ValidName")).toBe("Invalid");
     });
   });
 
   describe("getPhoneValidationError", () => {
     it("should return appropriate error messages for different invalid formats", () => {
-      expect(getPhoneValidationError("")).toBe("Phone number is required");
-      expect(getPhoneValidationError("3062776103")).toBe("Phone number must start with +1 (Canadian country code)");
-      expect(getPhoneValidationError("+130627761")).toBe("Phone number must be +1 followed by 10 digits");
-      expect(getPhoneValidationError("+130627761033")).toBe("Phone number must be +1 followed by 10 digits");
-      expect(getPhoneValidationError("+1306-277-6103")).toBe("Phone number must be +1 followed by 10 digits"); // 14 chars, fails length check first
-      expect(getPhoneValidationError("+1abcdefghij")).toBe("Phone number contains invalid characters"); // 12 chars but invalid
-      expect(getPhoneValidationError("+23062776103")).toBe("Phone number must start with +1 (Canadian country code)");
+      expect(getPhoneValidationError("")).toBe("Required");
+      expect(getPhoneValidationError("3062776103")).toBe("Need +1");
+      expect(getPhoneValidationError("+130627761")).toBe("Invalid format");
+      expect(getPhoneValidationError("+130627761033")).toBe("Invalid format");
+      expect(getPhoneValidationError("+1306-277-6103")).toBe("Invalid format"); // 14 chars, fails length check first
+      expect(getPhoneValidationError("+1abcdefghij")).toBe("Invalid chars"); // 12 chars but invalid
+      expect(getPhoneValidationError("+23062776103")).toBe("Need +1");
     });
   });
 });

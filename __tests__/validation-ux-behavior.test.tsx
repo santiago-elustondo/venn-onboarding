@@ -30,7 +30,9 @@ describe("Validation UX Behavior", () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
     jest.useRealTimers();
   });
 
@@ -46,19 +48,19 @@ describe("Validation UX Behavior", () => {
       await user.type(firstNameInput, "d");
       
       // Should NOT show any validation error yet
-      expect(screen.queryByText(/name is required|invalid name|name can only contain/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/required|invalid|letters only/i)).not.toBeInTheDocument();
       
       // Continue typing invalid input
       await user.type(firstNameInput, "3");
       
       // Still should NOT show validation error
-      expect(screen.queryByText(/name is required|invalid name|name can only contain/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/required|invalid|letters only/i)).not.toBeInTheDocument();
       
       // Complete invalid input
       await user.type(firstNameInput, "4");
       
       // Still should NOT show validation error while typing
-      expect(screen.queryByText(/name is required|invalid name|name can only contain/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/required|invalid|letters only/i)).not.toBeInTheDocument();
     });
     
     it("should NOT show 'invalid name' while typing valid characters", async () => {
@@ -121,7 +123,7 @@ describe("Validation UX Behavior", () => {
       
       // NOW should show validation error
       await waitFor(() => {
-        expect(screen.getByText(/name can only contain letters/i)).toBeInTheDocument();
+        expect(screen.getByText(/letters only/i)).toBeInTheDocument();
       });
     });
     
@@ -159,7 +161,7 @@ describe("Validation UX Behavior", () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(screen.getByText(/name is required/i)).toBeInTheDocument();
+        expect(screen.getByText(/required/i)).toBeInTheDocument();
       });
       
       // Clear and test invalid characters  
@@ -168,7 +170,7 @@ describe("Validation UX Behavior", () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(screen.getByText(/name can only contain letters/i)).toBeInTheDocument();
+        expect(screen.getByText(/letters only/i)).toBeInTheDocument();
       });
     });
   });
@@ -194,7 +196,7 @@ describe("Validation UX Behavior", () => {
       
       // NOW should show validation error
       await waitFor(() => {
-        expect(screen.getByText(/name can only contain letters/i)).toBeInTheDocument();
+        expect(screen.getByText(/letters only/i)).toBeInTheDocument();
       });
     });
     
@@ -237,7 +239,7 @@ describe("Validation UX Behavior", () => {
       
       // Should show error
       await waitFor(() => {
-        expect(screen.getByText(/name can only contain letters/i)).toBeInTheDocument();
+        expect(screen.getByText(/letters only/i)).toBeInTheDocument();
       });
       
       // 2. Fix the input by clearing and typing valid name
@@ -269,17 +271,26 @@ describe("Validation UX Behavior", () => {
       
       const phoneInput = screen.getByLabelText(/phone number/i);
       
-      // Type invalid phone while typing - no errors
-      await user.type(phoneInput, "invalid");
-      expect(screen.queryByTestId("phone-error")).not.toBeInTheDocument();
+      // Initially should be empty with no error
+      expect(phoneInput).toHaveValue("");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
       
-      // Blur to trigger validation
+      // Enter invalid phone number to trigger validation
+      await user.type(phoneInput, "123");
       await user.tab();
       
-      // Should show phone validation error
+      // Wait for blur to trigger error state
       await waitFor(() => {
-        expect(screen.getByText(/phone number must start with/i)).toBeInTheDocument();
+        expect(phoneInput).toHaveAttribute("aria-invalid", "true");
       });
+      
+      // Should show validation error for incomplete phone number
+      await waitFor(() => {
+        expect(screen.getByText(/invalid/i)).toBeInTheDocument();
+      });
+      
+      // The error should be displayed in a role="alert" element
+      expect(screen.getByRole("alert")).toBeInTheDocument();
     });
   });
 });

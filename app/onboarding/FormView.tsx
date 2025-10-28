@@ -9,6 +9,7 @@ import type React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/form-input";
+import { PhoneFieldView } from "./PhoneFieldView";
 import { Loader2, AlertCircle } from "lucide-react";
 import type { UseOnboardingFormReturn } from "@/modules/forms/useOnboardingForm";
 
@@ -43,10 +44,12 @@ export function FormView({ form, onSubmitSuccess }: FormViewProps) {
             value={form.firstName.value}
             error={fieldErrors.firstName || undefined}
             touched={form.firstName.isTouched}
+            isValid={form.firstName.isValid}
             maxLength={50}
             placeholder="Enter your first name"
             onChange={form.firstName.onChange}
             onBlur={form.firstName.onBlur}
+            onFocus={form.firstName.onFocus}
             disabled={form.isSubmitting}
             data-testid="first-name-input"
           />
@@ -57,26 +60,18 @@ export function FormView({ form, onSubmitSuccess }: FormViewProps) {
             value={form.lastName.value}
             error={fieldErrors.lastName || undefined}
             touched={form.lastName.isTouched}
+            isValid={form.lastName.isValid}
             maxLength={50}
             placeholder="Enter your last name"
             onChange={form.lastName.onChange}
             onBlur={form.lastName.onBlur}
+            onFocus={form.lastName.onFocus}
             disabled={form.isSubmitting}
             data-testid="last-name-input"
           />
 
-          <FormInput
-            id="phone"
-            label="Phone Number"
-            type="tel"
-            value={form.phone.value}
-            error={fieldErrors.phone || undefined}
-            touched={form.phone.isTouched}
-            placeholder="+13062776103"
-            onChange={form.phone.onChange}
-            onBlur={form.phone.onBlur}
-            disabled={form.isSubmitting}
-            data-testid="phone-input"
+          <PhoneFieldView
+            phone={form.phone}
           />
 
           <div className="space-y-2">
@@ -86,10 +81,13 @@ export function FormView({ form, onSubmitSuccess }: FormViewProps) {
               value={form.corporationNumber.value}
               error={fieldErrors.corporationNumber || undefined}
               touched={form.corporationNumber.isTouched}
+              isValid={form.corporationNumber.isValid}
+              isLoading={form.corporationNumber.isLoading}
               maxLength={9}
               placeholder="123456789"
               onChange={form.corporationNumber.onChange}
               onBlur={form.corporationNumber.onBlur}
+              onFocus={form.corporationNumber.onFocus}
               disabled={form.isSubmitting || form.corporationNumber.isLoading}
               data-testid="corporation-number-input"
             />

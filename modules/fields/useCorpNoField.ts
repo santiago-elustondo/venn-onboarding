@@ -43,6 +43,7 @@ export interface CorpNoFieldState {
 export type CorpNoFieldEvent =
   | { type: "change"; value: string; timestamp: number }
   | { type: "blur"; timestamp: number }
+  | { type: "focus"; timestamp: number }
   | { type: "evaluate"; timestamp: number }
   | { type: "remote:start"; currentValue: PlausibleCorpNo; timestamp: number }
   | { type: "remote:ok"; result: CorpNoValidationResult; timestamp: number }
@@ -113,6 +114,19 @@ function corpNoFieldReducer(
         ...state,
         lastBlurAt: event.timestamp,
       };
+    }
+    
+    case "focus": {
+      // Clear error states on focus
+      if (state.tag === "invalid" || state.tag === "error" || state.tag === "implausible") {
+        return {
+          ...state,
+          tag: state.value ? "active" : "empty",
+          localIssue: null,
+          remoteMessage: null,
+        };
+      }
+      return state;
     }
     
     case "evaluate": {
@@ -241,6 +255,7 @@ export interface CorpNoFieldHook {
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
+  onFocus: () => void;
   validateNow: () => Promise<boolean>;
   reset: () => void;
   
@@ -453,6 +468,10 @@ export function useCorpNoField({
     dispatch({ type: "blur", timestamp: Date.now() });
   }, []);
   
+  const onFocus = useCallback(() => {
+    dispatch({ type: "focus", timestamp: Date.now() });
+  }, []);
+  
   const validateNow = useCallback((): Promise<boolean> => {
     dispatch({ type: "evaluate", timestamp: Date.now() });
     
@@ -507,6 +526,7 @@ export function useCorpNoField({
     value: state.value,
     onChange,
     onBlur,
+    onFocus,
     validateNow,
     reset,
     isTouched,

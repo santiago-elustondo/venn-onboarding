@@ -42,16 +42,16 @@ export function isValidPhoneCA(s: string): boolean {
 export function getNameValidationError(name: string): string {
   const trimmed = name.trim();
   if (trimmed.length === 0) {
-    return "Name is required";
+    return "Required";
   }
   if (trimmed.length > 50) {
-    return "Name must be 50 characters or less";
+    return "Too long";
   }
-  // Check for invalid characters
+  // Check for invalid characters using the same validation as isValidName
   if (!/^[\p{L}\s'-]+$/u.test(trimmed)) {
-    return "Name can only contain letters, spaces, hyphens, and apostrophes";
+    return "Letters only";
   }
-  return "Invalid name";
+  return "Invalid";
 }
 
 /**
@@ -59,16 +59,16 @@ export function getNameValidationError(name: string): string {
  */
 export function getPhoneValidationError(phone: string): string {
   if (phone.length === 0) {
-    return "Phone number is required";
+    return "Required";
   }
   if (!phone.startsWith("+1")) {
-    return "Phone number must start with +1 (Canadian country code)";
+    return "Need +1";
   }
   if (phone.length !== 12) {
-    return "Phone number must be +1 followed by 10 digits";
+    return "Invalid format";
   }
   if (!/^\+1\d{10}$/.test(phone)) {
-    return "Phone number contains invalid characters";
+    return "Invalid chars";
   }
-  return "Invalid phone number";
+  return "Invalid";
 }

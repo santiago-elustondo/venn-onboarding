@@ -69,12 +69,12 @@ export function toPlausibleCorpNo(s: string): PlausibleCorpNo {
 export function formatCorpNoLocalIssue(issue: CorpNoLocalIssue): string {
   switch (issue) {
     case "empty":
-      return "Corporation number is required";
+      return "Required";
     case "contains_non_digit":
-      return "Corporation number must contain only digits";
+      return "Only digits";
     case "too_short":
-      return "Corporation number must be exactly 9 digits";
+      return "Invalid";
     case "too_long":
-      return "Corporation number must be exactly 9 digits";
+      return "Invalid";
   }
 }

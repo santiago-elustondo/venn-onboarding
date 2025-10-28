@@ -8,11 +8,11 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useNameField } from "../fields/useNameField";
-import { usePhoneField } from "../fields/usePhoneField";
+import { usePhoneField } from "../../hooks/usePhoneField";
 import { useCorpNoField } from "../fields/useCorpNoField";
 import { createDefaultCorpNoCache } from "../cache/inMemoryCorpNoCache";
 import { toPlausibleCorpNo } from "../domain/corpNo";
-import { getNameValidationError, getPhoneValidationError } from "../domain/simple";
+import { getNameValidationError } from "../domain/simple";
 import type { CorpNoFetcher } from "../io/corpFetcher";
 import type { ProfileDetailsSubmitter, ProfileDetailsPayload } from "../io/postProfileDetails";
 import type { CorpNoCache } from "../cache/inMemoryCorpNoCache";
@@ -78,7 +78,7 @@ export function useOnboardingForm({
   // Individual field hooks
   const firstName = useNameField({ idleMs });
   const lastName = useNameField({ idleMs });
-  const phone = usePhoneField({ idleMs });
+  const phone = usePhoneField();
   const corporationNumber = useCorpNoField({
     fetcher: corpFetcher,
     cache: actualCache,
@@ -110,9 +110,7 @@ export function useOnboardingForm({
         ? getNameValidationError(lastName.value) 
         : null,
       
-      phone: phone.isInvalid 
-        ? getPhoneValidationError(phone.value) 
-        : null,
+      phone: phone.error || null,
       
       corporationNumber: (() => {
         if (!corporationNumber.isTouched) return null;
@@ -144,7 +142,7 @@ export function useOnboardingForm({
   }, [
     firstName.isInvalid, firstName.value,
     lastName.isInvalid, lastName.value,
-    phone.isInvalid, phone.value,
+    phone.isValid, phone.isTouched, phone.error,
     corporationNumber.isTouched, corporationNumber.state, corporationNumber.localIssue,
   ]);
   
@@ -156,7 +154,7 @@ export function useOnboardingForm({
     // Trigger evaluation on all fields
     firstName.evaluate();
     lastName.evaluate();
-    phone.evaluate();
+    phone.touch(); // Mark phone as touched to show validation state
     
     // Wait a microtask for synchronous evaluations to complete
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -193,7 +191,7 @@ export function useOnboardingForm({
       const payload: ProfileDetailsPayload = {
         firstName: firstName.value.trim(),
         lastName: lastName.value.trim(),
-        phone: phone.value,
+        phone: phone.e164!, // We know it's valid at this point
         corporationNumber: corporationNumber.state.currentValue,
       };
       
@@ -238,7 +236,7 @@ export function useOnboardingForm({
     // Reset all fields
     firstName.onChange("");
     lastName.onChange("");
-    phone.onChange("");
+    phone.reset();
     corporationNumber.reset();
     
     // Reset form state
