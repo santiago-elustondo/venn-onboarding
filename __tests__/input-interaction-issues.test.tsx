@@ -164,9 +164,9 @@ describe("Input Interaction Issues", () => {
       await user.type(corpInput, "123");
       await user.tab();
       
-      // Should show "Invalid" error
+      // Should show "9 digits" error for wrong length
       await waitFor(() => {
-        expect(screen.getByText(/^invalid$/i)).toBeInTheDocument();
+        expect(screen.getByText("9 digits")).toBeInTheDocument();
       });
     });
 

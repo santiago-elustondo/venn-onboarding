@@ -73,8 +73,8 @@ export function formatCorpNoLocalIssue(issue: CorpNoLocalIssue): string {
     case "contains_non_digit":
       return "Only digits";
     case "too_short":
-      return "Invalid";
+      return "9 digits";
     case "too_long":
-      return "Invalid";
+      return "9 digits";
   }
 }

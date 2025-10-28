@@ -15,17 +15,22 @@ export function PhoneFieldView({ phone, className }: PhoneFieldViewProps) {
   
   return (
     <div className={`grid gap-1.5 ${className || ""}`}>
-      <Label htmlFor="phone" className="flex items-center gap-2">
-        Phone Number
-        {showValid && (
-          <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
-        )}
+      <div className="flex items-center justify-between">
+        <Label htmlFor="phone" className="flex items-center gap-2">
+          Phone Number
+          {showValid && (
+            <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+          )}
+        </Label>
         {showError && (
-          <span role="alert" className="text-sm text-destructive">
+          <span 
+            role="alert" 
+            className="text-sm text-destructive pointer-events-none"
+          >
             {phone.error}
           </span>
         )}
-      </Label>
+      </div>
       <PhoneInput
         id="phone"
         value={phone.value}

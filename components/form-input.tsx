@@ -50,20 +50,27 @@ export function FormInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className="text-sm font-medium flex items-center gap-2">
-        {label}
-        {isLoading && (
-          <Loader2 className="h-4 w-4 animate-spin text-blue-600" aria-hidden="true" data-testid="loading-spinner" />
-        )}
-        {!isLoading && showValid && (
-          <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
-        )}
+      <div className="flex items-center justify-between">
+        <Label htmlFor={id} className="text-sm font-medium flex items-center gap-2">
+          {label}
+          {isLoading && (
+            <Loader2 className="h-4 w-4 animate-spin text-blue-600" aria-hidden="true" data-testid="loading-spinner" />
+          )}
+          {!isLoading && showValid && (
+            <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+          )}
+        </Label>
         {!isLoading && showError && (
-          <span id={`${id}-error`} className="text-sm text-destructive" role="alert" data-testid={`${id}-error`}>
+          <span 
+            id={`${id}-error`} 
+            className="text-sm text-destructive pointer-events-none" 
+            role="alert" 
+            data-testid={`${id}-error`}
+          >
             {error}
           </span>
         )}
-      </Label>
+      </div>
       <Input
         id={id}
         type={type}
